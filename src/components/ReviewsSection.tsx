@@ -111,7 +111,7 @@ export function ReviewsSection({ restaurantId }: Props) {
               style={({ pressed }) => pressed && styles.pressed}>
               <ThemedView
                 type={selected ? 'backgroundSelected' : 'backgroundElement'}
-                style={styles.chip}>
+                style={styles.button}>
                 <ThemedText
                   type={selected ? 'smallBold' : 'small'}
                   themeColor={selected ? 'text' : 'textSecondary'}>
@@ -134,9 +134,11 @@ export function ReviewsSection({ restaurantId }: Props) {
           onPress={() => setShowAll((value) => !value)}
           accessibilityRole="button"
           style={({ pressed }) => [styles.seeAll, pressed && styles.pressed]}>
-          <ThemedText type="linkPrimary">
-            {showAll ? 'Show less' : `See all ${reviews.length} reviews`}
-          </ThemedText>
+          <ThemedView type="backgroundElement" style={styles.button}>
+            <ThemedText type="small">
+              {showAll ? 'Show less' : `See all ${reviews.length} reviews`}
+            </ThemedText>
+          </ThemedView>
         </Pressable>
       )}
     </View>
@@ -199,7 +201,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.two,
   },
-  chip: {
+  button: {
     paddingVertical: Spacing.one,
     paddingHorizontal: Spacing.three,
     borderRadius: 999,
@@ -208,7 +210,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   seeAll: {
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
   },
   pressed: {
     opacity: 0.7,
