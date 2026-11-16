@@ -1,20 +1,37 @@
-import { StyleSheet, View } from 'react-native';
+import { router } from 'expo-router';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
+import { RestaurantForm } from '@/components/RestaurantForm';
 import { Spacing } from '@/constants/theme';
+import { addRestaurant } from '@/services/restaurants';
+import type { NewRestaurant } from '@/types/restaurant';
 
-// TODO(Dhvani, Sprint 1): render <RestaurantForm />, call addRestaurant() on submit, then router.back()
 export default function AddRestaurantScreen() {
+  async function handleSubmit(values: NewRestaurant) {
+    await addRestaurant(values);
+    router.back();
+  }
+
   return (
-    <View style={styles.container}>
-      <ThemedText>Add restaurant (coming soon)</ThemedText>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive">
+        <RestaurantForm submitLabel="Add restaurant" onSubmit={handleSubmit} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
+  },
+  container: {
     padding: Spacing.three,
   },
 });
