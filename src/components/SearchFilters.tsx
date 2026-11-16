@@ -19,6 +19,7 @@ export function SearchFilters(props: Props) {
   const theme = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
+  //Writing the search bar and button into the same view tag so that they appear in the same line when styled
   return (
     <View style={styles.container}>
       <View style={[styles.bar, isFocused && styles.barFocused]}>
@@ -42,6 +43,13 @@ export function SearchFilters(props: Props) {
           </Pressable>
         )}
       </View>
+      { props.search !== "" && 
+      <ThemedText type="small" themeColor="textSecondary" style={styles.count}>{
+          props.resultCount === 0 ? "No restaurants" :( // Result count 
+          props.resultCount === 1 ? "1 restaurant" :    // each JSX tag corresponds to the condition right before it
+          `${props.resultCount} restaurants`)
+          }</ThemedText> 
+      }
     </View>
   );
 }
@@ -69,5 +77,9 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4,
+  },
+  count: {
+  marginTop: Spacing.two,       // gap below the bar
+  paddingHorizontal: Spacing.three, // lines the text up with the inside of the bar
   },
 });
