@@ -1,6 +1,7 @@
-import { ScrollView, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
 
 import { RestaurantCard } from '@/components/RestaurantCard';
+import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import type { Restaurant } from '@/types/restaurant';
 
@@ -11,13 +12,17 @@ type Props = {
 };
 
 // TODO(Max, Sprint 1): replace with a FlatList (pull-to-refresh, empty state)
-export function RestaurantList({ restaurants }: Props) {
+export function RestaurantList({ restaurants, refreshing, onRefresh }: Props) {
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {restaurants.map((restaurant) => (
-        <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-      ))}
-    </ScrollView>
+    <FlatList
+      data={restaurants}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => <RestaurantCard restaurant={item} />}
+      contentContainerStyle={styles.container}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      ListEmptyComponent={<ThemedText>No restaurants found!</ThemedText>}
+      />
   );
 }
 
