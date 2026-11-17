@@ -1,33 +1,62 @@
-import { Link, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { Link, useLocalSearchParams , Stack} from 'expo-router';
+import { StyleSheet, ScrollView, ActivityIndicator} from 'react-native';
 
-import { ReviewsSection } from '@/components/ReviewsSection';
+import { ReviewsSection} from '@/components/ReviewsSection';
+import { RestaurantDetails } from '@/components/RestaurantDetails';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useRestaurant } from '@/hooks/useRestaurant';
 
 export default function RestaurantScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { restaurant , loading } = useRestaurant(id);
 
-  // TODO(Santiago, Sprint 1): load the restaurant with useRestaurant(id) and render <RestaurantDetails />
-  // Keep the Edit link (Dhvani) and <ReviewsSection /> (Andy) on this screen.
-  return (
-    <View style={styles.container}>
-      <ThemedText>Restaurant {id}</ThemedText>
+  if (loading === true){
 
-      <Link href={`/edit/${id}`} style={styles.editLink}>
-        <ThemedText type="linkPrimary">Edit</ThemedText>
-      </Link>
+    return (
+    <ActivityIndicator></ActivityIndicator>
+    )
 
-      <ReviewsSection restaurantId={id} />
-    </View>
-  );
+  }
+
+  else {
+
+    if (restaurant === null) {
+      return (
+        <ThemedText>Restaurant not found</ThemedText>
+      );
+  
+    }
+
+
+      return (
+        <ScrollView contentContainerStyle={styles.contentContainer}>
+
+          <Stack.Screen options={{ title: restaurant.name }} />
+
+          <RestaurantDetails restaurant={restaurant}></RestaurantDetails>
+    
+          <Link href={`/edit/${id}`} style={styles.editLink}>
+            <ThemedText type="linkPrimary">Edit</ThemedText>
+          </Link>
+    
+          <ReviewsSection restaurantId={id} />
+        </ScrollView>
+      );
+
+
+    
+
+  }
+
+
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: Spacing.three,
+  contentContainer: {
+    padding : Spacing.three
   },
+
   editLink: {
     marginTop: Spacing.two,
   },
