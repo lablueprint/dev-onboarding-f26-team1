@@ -57,19 +57,25 @@ export default function ApiTestScreen() {
   useEffect(() => {
     const controller = new AbortController();
     const query = cuisine ? `?cuisine=${encodeURIComponent(cuisine)}` : '';
+    const timeout = AbortSignal.timeout(10000);
 
     (async () => {
       try {
         const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/restaurants${query}`, {
-          signal: controller.signal,
+          signal: AbortSignal.any([controller.signal, timeout]),
         });
         if (!response.ok) {
+          if (process.env.EXPO_PUBLIC_API_URL == null){
+            setError('No api url set, please check .env');
+            return;
+          }
           setError(`HTTP ${response.status}`);
           return;
         }
         setData(await response.json());
       } catch (err) {
-        if (!controller.signal.aborted) setError(`Fetch failed: ${err}`);
+        if (controller.signal.aborted) return;
+        setError(timeout.aborted ? 'Request timed out' : `Fetch failed: ${err}`);
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
