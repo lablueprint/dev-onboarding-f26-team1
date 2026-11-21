@@ -29,7 +29,12 @@ app.use('/', (req, res) => {
 
 // Express only treats middleware with 4 parameters as an error handler, so we have to keep 'next'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((error: Error & { type?: string }, req: Request, res: Response, next: NextFunction) => {
+  // express.json() passes malformed bodies here; that's the client's fault, not ours
+  if (error.type === 'entity.parse.failed') {
+    res.status(400).json({ error: 'Request body is not valid JSON' });
+    return;
+  }
   console.error(error);
   res.status(500).json({ error: 'Internal server error' });
 });
