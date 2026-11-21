@@ -38,6 +38,9 @@ const styles = StyleSheet.create({
   },
 });
 
+// Inlined at build time, so it never changes while the app runs
+const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+
 export default function ApiTestScreen() {
   const theme = useTheme();
   const [cuisine, setCuisine] = useState<Cuisine | null>(null);
@@ -55,20 +58,17 @@ export default function ApiTestScreen() {
   };
 
   useEffect(() => {
+    if (!apiUrl) return;
     const controller = new AbortController();
     const query = cuisine ? `?cuisine=${encodeURIComponent(cuisine)}` : '';
     const timeout = AbortSignal.timeout(10000);
 
     (async () => {
       try {
-        const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/restaurants${query}`, {
+        const response = await fetch(`${apiUrl}/restaurants${query}`, {
           signal: AbortSignal.any([controller.signal, timeout]),
         });
         if (!response.ok) {
-          if (process.env.EXPO_PUBLIC_API_URL == null){
-            setError('No api url set, please check .env');
-            return;
-          }
           setError(`HTTP ${response.status}`);
           return;
         }
@@ -85,6 +85,9 @@ export default function ApiTestScreen() {
   }, [cuisine, attempt]);
 
   const renderContent = () => {
+    if (!apiUrl) {
+      return <ThemedText style={styles.message}>Set EXPO_PUBLIC_API_URL in .env.local</ThemedText>;
+    }
     if (loading) {
       return <ThemedText style={styles.message}>Loading...</ThemedText>;
     }
