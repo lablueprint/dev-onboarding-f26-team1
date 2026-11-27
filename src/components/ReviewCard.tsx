@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -8,12 +8,14 @@ import { timeAgo } from '@/utils/date';
 
 type Props = {
   review: Review;
+  onDelete?: () => void;
 };
 
 const MAX_STARS = 5;
 const AVATAR_SIZE = 40;
+const DELETE_HIT_SLOP = Spacing.two;
 
-export function ReviewCard({ review }: Props) {
+export function ReviewCard({ review, onDelete }: Props) {
   const initial = review.author.charAt(0).toUpperCase();
   const stars = '★'.repeat(review.rating) + '☆'.repeat(MAX_STARS - review.rating);
   const date = timeAgo(review.createdAt);
@@ -30,9 +32,21 @@ export function ReviewCard({ review }: Props) {
             <ThemedText type="smallBold" numberOfLines={1} style={styles.author}>
               {review.author}
             </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              {date}
-            </ThemedText>
+            <View style={styles.dateRow}>
+              <ThemedText type="small" themeColor="textSecondary">
+                {date}
+              </ThemedText>
+              {onDelete && (
+                <Pressable
+                  onPress={onDelete}
+                  hitSlop={DELETE_HIT_SLOP}
+                  accessibilityRole="button"
+                  accessibilityLabel="Delete your review"
+                  style={({ pressed }) => pressed && styles.pressed}>
+                  <ThemedText type="small">🗑️</ThemedText>
+                </Pressable>
+              )}
+            </View>
           </View>
           <ThemedText type="small" accessibilityLabel={`${review.rating} out of ${MAX_STARS} stars`}>
             {stars}
@@ -73,5 +87,13 @@ const styles = StyleSheet.create({
   },
   author: {
     flexShrink: 1,
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  pressed: {
+    opacity: 0.5,
   },
 });
