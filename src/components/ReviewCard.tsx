@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -8,12 +8,14 @@ import { timeAgo } from '@/utils/date';
 
 type Props = {
   review: Review;
+  onDelete?: () => void;
 };
 
 const MAX_STARS = 5;
 const AVATAR_SIZE = 40;
+const DELETE_HIT_SLOP = Spacing.two;
 
-export function ReviewCard({ review }: Props) {
+export function ReviewCard({ review, onDelete }: Props) {
   const initial = review.author.charAt(0).toUpperCase();
   const stars = '★'.repeat(review.rating) + '☆'.repeat(MAX_STARS - review.rating);
   const date = timeAgo(review.createdAt);
@@ -38,6 +40,17 @@ export function ReviewCard({ review }: Props) {
             {stars}
           </ThemedText>
         </View>
+
+        {onDelete && (
+          <Pressable
+            onPress={onDelete}
+            hitSlop={DELETE_HIT_SLOP}
+            accessibilityRole="button"
+            accessibilityLabel="Delete your review"
+            style={({ pressed }) => pressed && styles.pressed}>
+            <ThemedText style={styles.deleteIcon}>🗑️</ThemedText>
+          </Pressable>
+        )}
       </View>
 
       <ThemedText type="small">{review.text}</ThemedText>
@@ -73,5 +86,11 @@ const styles = StyleSheet.create({
   },
   author: {
     flexShrink: 1,
+  },
+  deleteIcon: {
+    fontSize: 18,
+  },
+  pressed: {
+    opacity: 0.5,
   },
 });

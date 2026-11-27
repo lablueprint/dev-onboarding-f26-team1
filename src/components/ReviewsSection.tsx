@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { ReviewCard } from '@/components/ReviewCard';
+import { ReviewForm, type ReviewFormValues } from '@/components/ReviewForm';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { REVIEWS } from '@/data/reviews';
+import { useReviews, type ReviewItem } from '@/hooks/useReviews';
 import { useTheme } from '@/hooks/use-theme';
 import type { Review } from '@/types/review';
 
@@ -23,9 +24,10 @@ const SORT_OPTIONS: { value: SortOrder; label: string }[] = [
   { value: 'highest', label: 'Highest rated' },
 ];
 
-function sortReviews(reviews: Review[], order: SortOrder): Review[] {
-  // Sort a copy so we never mutate REVIEWS
-  const byNewest = (a: Review, b: Review) => b.createdAt.localeCompare(a.createdAt);
+const PRIMARY_BLUE = '#208AEF';
+
+function sortReviews<T extends Review>(reviews: T[], order: SortOrder): T[] {
+  const byNewest = (a: T, b: T) => b.createdAt.localeCompare(a.createdAt);
 
   if (order === 'highest') {
     return [...reviews].sort((a, b) => b.rating - a.rating || byNewest(a, b));
@@ -36,22 +38,60 @@ function sortReviews(reviews: Review[], order: SortOrder): Review[] {
 export function ReviewsSection({ restaurantId }: Props) {
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
   const [showAll, setShowAll] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const theme = useTheme();
 
-  const reviews = REVIEWS.filter((review) => review.restaurantId === restaurantId);
+  const { reviews, addReview, deleteReview } = useReviews(restaurantId);
+
+  async function handleSubmit(values: ReviewFormValues) {
+    await addReview(values);
+    setSortOrder('newest');
+    setShowForm(false);
+  }
+
+  function confirmDelete(review: ReviewItem) {
+    Alert.alert('Delete review?', "This can't be undone.", [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Delete', style: 'destructive', onPress: () => deleteReview(review.id) },
+    ]);
+  }
+
+  const header = (
+    <View style={styles.headerRow}>
+      <ThemedText type="smallBold">
+        {reviews.length > 0 ? `Reviews (${reviews.length})` : 'Reviews'}
+      </ThemedText>
+      {!showForm && (
+        <Pressable
+          onPress={() => setShowForm(true)}
+          accessibilityRole="button"
+          style={({ pressed }) => [styles.writeButton, pressed && styles.pressed]}>
+          <ThemedText type="smallBold" style={styles.writeButtonText}>
+            + Write a review
+          </ThemedText>
+        </Pressable>
+      )}
+    </View>
+  );
+
+  const form = showForm && (
+    <ReviewForm onSubmit={handleSubmit} onCancel={() => setShowForm(false)} />
+  );
 
   if (reviews.length === 0) {
     return (
       <View style={styles.container}>
-        <ThemedText type="smallBold">Reviews</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          No reviews yet.
-        </ThemedText>
+        {header}
+        {form}
+        <ThemedView type="backgroundElement" style={styles.empty}>
+          <ThemedText type="small" themeColor="textSecondary">
+            No reviews yet. Be the first!
+          </ThemedText>
+        </ThemedView>
       </View>
     );
   }
 
-  // Everything below is derived on each render
   const average = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
   const breakdown = STAR_LEVELS.map((stars) => {
     const count = reviews.filter((review) => review.rating === stars).length;
@@ -64,7 +104,8 @@ export function ReviewsSection({ restaurantId }: Props) {
 
   return (
     <View style={styles.container}>
-      <ThemedText type="smallBold">Reviews ({reviews.length})</ThemedText>
+      {header}
+      {form}
 
       <ThemedView type="backgroundElement" style={styles.summary}>
         <View style={styles.average}>
@@ -125,7 +166,11 @@ export function ReviewsSection({ restaurantId }: Props) {
 
       <View style={styles.list}>
         {visible.map((review) => (
-          <ReviewCard key={review.id} review={review} />
+          <ReviewCard
+            key={review.id}
+            review={review}
+            onDelete={review.isOwn ? () => confirmDelete(review) : undefined}
+          />
         ))}
       </View>
 
@@ -151,6 +196,26 @@ const styles = StyleSheet.create({
   container: {
     marginTop: Spacing.four,
     gap: Spacing.two,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  writeButton: {
+    backgroundColor: PRIMARY_BLUE,
+    paddingVertical: Spacing.one,
+    paddingHorizontal: Spacing.three,
+    borderRadius: 999,
+  },
+  writeButtonText: {
+    color: '#fff',
+  },
+  empty: {
+    padding: Spacing.three,
+    borderRadius: 12,
+    alignItems: 'center',
   },
   summary: {
     flexDirection: 'row',
