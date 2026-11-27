@@ -83,11 +83,9 @@ export function ReviewsSection({ restaurantId }: Props) {
       <View style={styles.container}>
         {header}
         {form}
-        <ThemedView type="backgroundElement" style={styles.empty}>
-          <ThemedText type="small" themeColor="textSecondary">
-            No reviews yet. Be the first!
-          </ThemedText>
-        </ThemedView>
+        <ThemedText type="small" themeColor="textSecondary" style={styles.emptyText}>
+          No reviews yet. Be the first!
+        </ThemedText>
       </View>
     );
   }
@@ -212,10 +210,8 @@ const styles = StyleSheet.create({
   writeButtonText: {
     color: '#fff',
   },
-  empty: {
-    padding: Spacing.three,
-    borderRadius: 12,
-    alignItems: 'center',
+  emptyText: {
+    textAlign: 'center',
   },
   summary: {
     flexDirection: 'row',

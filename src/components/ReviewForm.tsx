@@ -161,15 +161,21 @@ export function ReviewForm({ onSubmit, onCancel }: Props) {
         <Pressable
           onPress={onCancel}
           accessibilityRole="button"
-          style={[styles.button, styles.cancelButton, { borderColor }]}>
-          <ThemedText type="smallBold">Cancel</ThemedText>
+          style={({ pressed }) => pressed && styles.pressed}>
+          <ThemedView type="backgroundSelected" style={styles.button}>
+            <ThemedText type="smallBold">Cancel</ThemedText>
+          </ThemedView>
         </Pressable>
         <Pressable
           onPress={handleSubmit}
           disabled={submitting}
           accessibilityRole="button"
           accessibilityState={{ disabled: submitting }}
-          style={[styles.button, styles.submitButton, submitting && styles.submitDisabled]}>
+          style={({ pressed }) => [
+            styles.button,
+            styles.submitButton,
+            (pressed || submitting) && styles.pressed,
+          ]}>
           <ThemedText type="smallBold" style={styles.submitText}>
             {submitting ? 'Posting…' : 'Post review'}
           </ThemedText>
@@ -190,10 +196,11 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 16,
+    borderRadius: 12,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    fontSize: 14,
+    lineHeight: 20,
   },
   multiline: {
     minHeight: 100,
@@ -201,42 +208,37 @@ const styles = StyleSheet.create({
   starRow: {
     flexDirection: 'row',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   starButton: {
     flex: 1,
-    minHeight: 44,
+    paddingVertical: Spacing.one,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   star: {
-    fontSize: 28,
-    lineHeight: 36,
+    fontSize: 24,
+    lineHeight: 32,
   },
   counter: {
     textAlign: 'right',
   },
   buttons: {
     flexDirection: 'row',
+    justifyContent: 'flex-end',
     gap: Spacing.two,
   },
   button: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelButton: {
-    borderWidth: 1,
+    paddingVertical: Spacing.one,
+    paddingHorizontal: Spacing.three,
+    borderRadius: 999,
   },
   submitButton: {
     backgroundColor: '#208AEF',
   },
-  submitDisabled: {
-    opacity: 0.6,
-  },
   submitText: {
     color: '#fff',
+  },
+  pressed: {
+    opacity: 0.7,
   },
 });
