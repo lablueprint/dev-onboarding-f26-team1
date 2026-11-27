@@ -32,25 +32,26 @@ export function ReviewCard({ review, onDelete }: Props) {
             <ThemedText type="smallBold" numberOfLines={1} style={styles.author}>
               {review.author}
             </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              {date}
-            </ThemedText>
+            <View style={styles.dateRow}>
+              <ThemedText type="small" themeColor="textSecondary">
+                {date}
+              </ThemedText>
+              {onDelete && (
+                <Pressable
+                  onPress={onDelete}
+                  hitSlop={DELETE_HIT_SLOP}
+                  accessibilityRole="button"
+                  accessibilityLabel="Delete your review"
+                  style={({ pressed }) => pressed && styles.pressed}>
+                  <ThemedText type="small">🗑️</ThemedText>
+                </Pressable>
+              )}
+            </View>
           </View>
           <ThemedText type="small" accessibilityLabel={`${review.rating} out of ${MAX_STARS} stars`}>
             {stars}
           </ThemedText>
         </View>
-
-        {onDelete && (
-          <Pressable
-            onPress={onDelete}
-            hitSlop={DELETE_HIT_SLOP}
-            accessibilityRole="button"
-            accessibilityLabel="Delete your review"
-            style={({ pressed }) => pressed && styles.pressed}>
-            <ThemedText style={styles.deleteIcon}>🗑️</ThemedText>
-          </Pressable>
-        )}
       </View>
 
       <ThemedText type="small">{review.text}</ThemedText>
@@ -87,8 +88,10 @@ const styles = StyleSheet.create({
   author: {
     flexShrink: 1,
   },
-  deleteIcon: {
-    fontSize: 18,
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
   },
   pressed: {
     opacity: 0.5,
